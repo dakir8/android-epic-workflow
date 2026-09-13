@@ -1,6 +1,6 @@
 # Android EPIC Development Workflow
 
-Human reference guide. For agent execution, reference the compact sibling file `android-epic-agent.md` instead of asking the agent to read this full guide. The examples below remain explanatory; use the compact file's absolute path in initial and continuation prompts.
+Human reference guide. For agent execution, reference the compact sibling file `android-epic-agent.md`. The longer templates below explain the workflow; you do not need to send them to the agent.
 
 This workflow is for medium-to-hard Android EPICs when usage credits may run out before the work is finished. The main agent owns implementation and integration. Human approval is required before starting the next slice; there is no automatic continuation.
 
@@ -8,10 +8,12 @@ This workflow is for medium-to-hard Android EPICs when usage credits may run out
 
 You provide the feature request, known constraints, and authorization to work on a slice. The main agent fills in the engineering details below. You do not need to prepare subagent prompts or maintain the checkpoint yourself.
 
-Once per EPIC, in the Android project's conversation, reference this workflow file and describe the feature:
+For the example below, first copy `android-epic-agent.md` into your Android repository root. You only need the compact file in that project. Alternatively, keep it elsewhere and replace the first line with its actual absolute path.
+
+Once per EPIC, in the Android project's conversation, reference the compact file and describe the feature:
 
 ```text
-Follow /Users/daniel/Developer/daily/chat/android-epic-workflow.md.
+Follow `android-epic-agent.md` from the repository root.
 Plan an EPIC for [describe the feature and desired behavior].
 Constraints: [known requirements, or say none known].
 Create the specification and progress log, assign slice IDs, and recommend
@@ -39,9 +41,9 @@ If the last slice was interrupted instead, say:
 Resume the unfinished authorized slice under the same workflow, then stop.
 ```
 
-You do not need to paste full Prompt 2 at every slice. It is the execution contract stored in this file. In a new conversation, explicitly reference the workflow, specification, progress log, and authorized slice. The agent must return a ready-to-paste handoff with actual absolute paths and the actual slice ID, not placeholders. Open the same Android project/worktree; if it has moved, have the agent reconcile the paths and working tree first.
+You do not need to paste full Prompt 2 at every slice. The compact agent file contains the execution rules. In a new conversation, explicitly reference `android-epic-agent.md`, the specification, progress log, and authorized slice. The agent must return a ready-to-paste handoff with actual absolute paths and the actual slice ID, not placeholders. Open the same Android project/worktree; if it has moved, have the agent reconcile the paths and working tree first.
 
-Saving this file does not automatically load it in every conversation. Reference its path when starting a new one. If the file is unavailable on another machine, copy it there or paste Prompt 2 once in that conversation.
+Saving the compact file does not automatically load it in every conversation. Reference it when starting a new one. If it is unavailable on another machine, copy it there or paste its contents once in that conversation. Reading the file still uses context; the compact version avoids loading this longer human guide.
 
 ## Who fills in each field?
 
