@@ -23,9 +23,7 @@ If a slice is clearly too large, record a smaller coherent subdivision and execu
 
 ## Delegation
 
-The main agent owns integration; preferred main settings are Astra/low or Sol/medium, selected by the user. Run short checks directly. Delegate only bounded independent work when its benefit justifies overhead, with at most one subagent at a time. Explicitly select Luna/low for mechanical verification, Terra/medium for ordinary correctness review, or Sol/medium for a justified complex independent investigation. Retain difficult integration judgment yourself.
-
-Fill delegation packets yourself: actual workspace, stable code state, scope, acceptance criteria, commands/scenarios, environment, and evidence locations. Verifiers may generate artifacts but cannot edit source/configuration/tests; reviewers cannot edit files. Require actual results, actionable findings with file references and triggers, and verification/review limits. Resolve confirmed findings before completion. Avoid editing reviewed files, competing Gradle builds, or shared emulator use during checks. Account for uncommitted changes when identifying snapshots; a commit ID alone is insufficient.
+Preferred main settings are Astra/low or Sol/medium, selected by the user. Use subagents when they help complete the authorized slice efficiently. Choose task boundaries, models, reasoning levels, and concurrency using your judgment; prefer economical choices when they can deliver the required quality. The main agent remains responsible for integration and the final result.
 
 ## Checkpoint and stop
 

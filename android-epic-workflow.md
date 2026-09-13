@@ -58,7 +58,7 @@ For a new conversation, open the same Android project/worktree and paste the han
 
 Only your feature description, known constraints, and the decision to proceed. The agent discovers technical details, prepares any subagent assignments, records checks and evidence, and maintains the progress log.
 
-The skill contains the delegation preferences: Luna / low for useful independent mechanical verification and Terra / medium for ordinary focused review. Short checks run directly when delegation overhead is not worthwhile. The main agent owns integration.
+The agent decides whether and how to delegate, with a preference for economical choices that preserve quality. You do not need to assign worker models or manage subagents.
 
 ## Background
 
