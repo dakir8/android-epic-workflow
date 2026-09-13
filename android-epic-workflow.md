@@ -1,254 +1,65 @@
-# Android EPIC Development Workflow
+# Android EPIC: human guide
 
-Human reference guide. For agent execution, invoke `$android-epic`. Its maintained instructions live in `skills/android-epic/SKILL.md`; the longer templates below are explanatory and are not loaded by the skill. The installed personal copy lives in `~/.codex/skills/android-epic`. After editing the repository skill, sync that directory to the installed copy before using the update.
+Use `$android-epic` to plan and deliver medium-to-hard Android EPICs one authorized slice at a time. You describe the feature and decide when to start each slice; the agent handles implementation, verification, and progress records.
 
-This workflow is for medium-to-hard Android EPICs when usage credits may run out before the work is finished. The main agent owns implementation and integration. Human approval is required before starting the next slice; there is no automatic continuation.
+## Which file should I use?
 
-## Quick start: what you actually type
+- [SKILL.md](skills/android-epic/SKILL.md) is the single source of agent execution rules. Invoke the installed skill instead of pasting those rules.
+- This file explains how to use the skill. You do not need to give it to the agent.
+- [android-epic-agent.md](android-epic-agent.md) is a compatibility pointer for older prompts.
 
-You provide the feature request, known constraints, and authorization to work on a slice. The main agent fills in the engineering details below. You do not need to prepare subagent prompts or maintain the checkpoint yourself.
+The personal installation is at `~/.codex/skills/android-epic`. After changing the repository's `skills/android-epic` directory, sync it to that installation. On another machine, install the skill there or reference the actual absolute path to its `SKILL.md`.
 
-Use the installed skill in your Android project. For another machine, install the `skills/android-epic` directory in that machine’s Codex skills directory. Without installation, reference the actual absolute path to its `SKILL.md`.
+## Start an EPIC
 
-Once per EPIC, describe the feature:
-
-```text
-Use $android-epic.
-Plan an EPIC for [describe the feature and desired behavior].
-Constraints: [known requirements, or say none known].
-Create the specification and progress log, assign slice IDs, and recommend
-the first slice. Give me the exact prompt to authorize it. Do not implement yet.
-```
-
-That is the only template here that normally needs your own feature description. Planning produces the rest. You can also use the longer initial design prompt if you already have detailed requirements.
-
-After reviewing the plan, in the same conversation:
+Open your Android project and select **Astra / low** or **Sol / medium** as the main model. Then send:
 
 ```text
-Execute the first recommended slice under the saved one-slice workflow.
-Complete its implementation, validation, and fixes, then stop.
+Use $android-epic to plan an EPIC for [describe your feature].
+Constraints: [known requirements, or none known].
+Do not implement yet.
 ```
 
-After each completed slice, use the exact next-slice prompt returned by the agent, or say:
+The agent creates the specification and progress log, assigns slice IDs, and returns an exact prompt to authorize the first slice. Review the plan and send that prompt when ready.
+
+## Execute and continue
+
+Mention `$android-epic` when starting the EPIC or a new conversation. For follow-ups on the same EPIC in the same conversation, you do not need to repeat its name or the workflow rules.
+
+Authorize the first slice with:
 
 ```text
-Execute the next recommended slice under the same workflow, then stop.
+Execute the first recommended slice, then stop.
 ```
 
-If the last slice was interrupted instead, say:
+After a completed slice:
 
 ```text
-Resume the unfinished authorized slice under the same workflow, then stop.
+Execute the next recommended slice, then stop.
 ```
 
-You do not need to paste full Prompt 2 at every slice. The skill contains the execution rules. In a new conversation, invoke `$android-epic` and supply the specification, progress log, and authorized slice using the generated handoff. The agent must return a ready-to-paste handoff with actual absolute paths and the actual slice ID, not placeholders. Open the same Android project/worktree; if it has moved, have the agent reconcile the paths and working tree first.
+The agent completes implementation, relevant validation, and fixes within that slice. You decide whether to start another. You do not need to paste a full implementation prompt each time.
 
-The skill’s name and description support discovery; its instructions load when used. Invoke it explicitly when starting a new EPIC conversation. Loaded instructions still use context, but the human guide is kept outside the skill.
-
-## Who fills in each field?
-
-| Template field | Filled by | Meaning |
-|---|---|---|
-| EPIC name and desired outcome | You describe it; agent can name it | The feature or problem to solve |
-| Specification path | Main agent during planning | File containing agreed behavior, acceptance criteria, and slices |
-| Progress log path | Main agent during planning | File tracking completed and unfinished work |
-| Authorized slice ID | Agent proposes; you authorize | A stable identifier such as S01, assigned in the specification |
-| Workspace and snapshot identity | Main agent before delegation | Actual checkout and exact code state being checked |
-| Scope | Main agent | Relevant behavior, modules, or files for that assignment |
-| Acceptance criteria and constraints | Main agent from specification | Criterion IDs plus expected behavior and constraints |
-| Commands/scenarios | Main agent from repository and validation plan | Real Gradle tasks or reproducible device steps; never guessed task names |
-| Environment/variant/device | Main agent from inspection | Actual build variant, toolchain, and available device/API; mark unavailable items |
-| Evidence output location | Main agent | Existing test reports or a chosen local evidence directory |
-| Base and reviewed snapshot | Main agent | The before/after code states defining the review diff |
-| Every checkpoint field | Main agent throughout execution | Factual status and evidence, not a form for you to complete |
-
-For example, planning an offline bookmarks feature might produce specification `docs/epics/offline-bookmarks/spec.md`, progress log `docs/epics/offline-bookmarks/progress.md`, slice `S01`, and criterion `AC-01: saved bookmarks remain available after relaunch while offline`. These are illustrative names, not existing files or prescribed module names. The agent chooses the repository's established location and returns actual paths.
-
-A commit ID alone does not identify uncommitted edits. The main agent must record those too, using a stable captured diff/content identity or isolated snapshot, and keep reviewed files unchanged while the check runs. A special commit is not required simply to fill in this field. Missing devices, checks, or evidence must be recorded as unavailable or not run, never invented.
-
-## Model allocation
-
-| Work | Model and reasoning | Use |
-|---|---|---|
-| Main EPIC agent | Astra / low (default) or Sol / medium | Design, implementation, integration, and decisions within the authorized slice. Select the main model in the app; do not specify it in prompts. |
-| Mechanical verification | Luna / low | Independent, bounded test execution, build/lint checks, or evidence gathering when delegation has no material effect on the result. Run directly when delegation overhead is not worthwhile. |
-| Bounded review | Terra / medium | Independent focused correctness review of a stable snapshot. |
-| Complex review or investigation | Main agent, or Sol / medium when a separate bounded investigation is useful | Cross-module behavior, concurrency, lifecycle, persistence, or other judgment-heavy issues. |
-
-Delegation is optional. Use Luna for fully independent mechanical tasks when the lower-cost assignment is unlikely to compromise result quality. Findings may still change the implementation. Use at most one subagent at a time for this workflow, and provide the exact scope, stable snapshot, commands, and output required. Specify both model and reasoning explicitly. Avoid concurrent edits to the reviewed snapshot, competing Gradle builds, or shared emulator use.
-
-## Workflow
-
-1. During initial EPIC planning, inspect repository instructions, architecture, build variants, dependencies, tests, and CI commands. On later slices, revisit only relevant information or changed assumptions.
-2. Create an implementation-ready EPIC specification with acceptance criteria, non-goals, risks, and dependency-ordered vertical slices.
-3. Authorize one slice at a time. The main agent may make ordinary implementation decisions within that slice.
-4. Complete the slice: implementation, meaningful tests, relevant validation, and fixes for confirmed issues.
-5. Update the progress log incrementally, including before expensive work so an interruption leaves a usable checkpoint.
-6. Stop at the slice boundary and ask the human to authorize the next slice. Never schedule automatic continuation.
-7. At EPIC completion, map every acceptance criterion to evidence and record remaining risks or unverified behavior.
-
-Use checks that match the changed behavior, including lifecycle recreation/process death, coroutine cancellation, offline/retry behavior, navigation, persistence, permissions, and accessibility where relevant. Do not claim skipped or unavailable checks passed. There is no guaranteed token saving from changing conversations or delegating work.
-
-## Initial design prompt
+If usage interrupts unfinished work, resume with:
 
 ```text
-Design an implementation-ready plan for this Android EPIC:
-
-EPIC: [name]
-User problem and desired outcome: [description]
-Acceptance criteria: [observable behaviors, if known]
-Constraints and non-goals: [details]
-Relevant modules, designs, or references: [paths/links]
-
-Inspect the repository and applicable AGENTS.md instructions first. Discover the actual architecture, supported Android versions, build variants, dependency versions, test conventions, and CI commands. Use existing patterns unless there is a concrete reason to change them.
-
-Create an EPIC specification and a concise progress/evidence log in the repository's established documentation location.
-
-Assign stable slice IDs and fill in all technical fields from repository evidence. Return the actual absolute paths, the recommended first slice, and a ready-to-paste authorization prompt referencing this workflow. Do not leave the user to construct engineering task packets.
-
-Include:
-- Observable acceptance criteria with stable IDs.
-- Scope, non-goals, assumptions, and unresolved decisions.
-- Existing code paths and proposed changes.
-- State ownership and important state transitions.
-- API, persistence, compatibility, and migration implications.
-- Relevant Android failure cases, omitting irrelevant items.
-- Dependency-ordered vertical slices with behavior, modules, prerequisites, and verification.
-- The highest-risk uncertainty and the smallest experiment to resolve it.
-
-Prefer the simplest design that meets the requirements. Do not introduce generic frameworks or unrelated refactoring. Delegate only fully independent, bounded research or inspection when it adds value; use Luna/low for mechanical fact gathering and Terra/medium when tracing behavior requires judgment. Keep dependent architectural decisions with the main agent. Ask only questions whose answers materially change scope or behavior. Finish with an implementation-ready plan; do not implement the EPIC yet.
+Resume the unfinished authorized slice, then stop.
 ```
 
-## Prompt 2 — complete one authorized slice
+Small slices and incremental checkpoints help with usage limits, but do not guarantee that a slice fits within your remaining allowance.
 
-```text
-Complete one Android EPIC slice.
+## Same conversation or a new one?
 
-Specification: [path]
-Progress log: [path]
-Authorized slice: [ID]
+Continue in the same conversation for an unfinished slice or closely related work. Consider a new conversation after a completed slice when the next work is independent or the old context is stale. A usage reset alone does not require starting fresh.
 
-Outcome
-Deliver the slice's acceptance criteria as working, integrated behavior. Completion includes implementation, relevant validation, independent review when warranted, and fixing confirmed issues caused by this change. A first implementation or successful compilation alone is not completion.
+For a new conversation, open the same Android project/worktree and paste the handoff the agent supplies. It contains the skill invocation, actual specification and progress-log paths, and the slice ID. You do not need to construct those fields. If the workspace moved, tell the agent so it can reconcile the recorded state.
 
-Authority within this slice
-Proceed with ordinary local implementation decisions, source/test edits, and appropriate development checks without asking for approval at each step. Follow existing repository patterns and preserve unrelated changes. When a check fails, investigate and fix failures caused by this slice, then rerun affected checks. Ask only when a decision materially changes product behavior or scope, requires an external commitment, or exceeds the available authorization.
+## What do I fill in?
 
-Continue until the slice is complete or a specific blocker prevents further useful work. Continue unaffected work while a question is pending. Do not stop merely to ask whether you should test, review, or fix your work.
+Only your feature description, known constraints, and the decision to proceed. The agent discovers technical details, prepares any subagent assignments, records checks and evidence, and maintains the progress log.
 
-Scope and efficiency
-Read the specification, checkpoint, applicable repository instructions, and code needed for this slice. Choose validation based on changed behavior and repository requirements. Avoid redundant exploration, speculative refactoring, and repeated checks without a new reason. If the slice is clearly too large, record a smaller coherent subdivision and complete its first part; do not silently reduce acceptance criteria.
+The skill contains the delegation preferences: Luna / low for useful independent mechanical verification and Terra / medium for ordinary focused review. Short checks run directly when delegation overhead is not worthwhile. The main agent owns integration.
 
-Delegation
-Use tools directly for short checks. Delegate only bounded, fully independent work that adds enough value to justify its overhead, using at most one subagent at a time. Select Luna/low for mechanical verification and Terra/medium for ordinary focused review. Keep difficult integration reasoning with the main agent. Review and act on findings before declaring completion.
+## Background
 
-Specify both model and reasoning. Give each subagent the exact scope and stable snapshot; avoid editing that snapshot during verification or review. Avoid competing Gradle builds or shared emulator use.
-
-Checkpoint
-Update the progress log at meaningful milestones and before expensive work. Record status, changed files, decisions, validation evidence, remaining issues, and the next concrete action. If usage is interrupted, leave an accurate partial checkpoint and never describe incomplete validation as passed.
-
-Stopping boundary
-Stop after this slice is complete. Starting another slice requires my explicit authorization. Resuming unfinished work in this authorized slice does not require another scope approval. Do not begin the next slice or schedule automatic continuation.
-
-If genuinely blocked, record the blocker and finish unaffected work. If a skill or repository instruction causes an otherwise unnecessary pause, identify its file and exact instruction, explain the conflict, and resolve it using the applicable instruction hierarchy.
-
-Final response
-Report complete/partial/blocked status, delivered behavior, validation evidence and gaps, proposed next slice, a same/new conversation recommendation, and a copyable continuation prompt.
-
-Fill the continuation prompt with actual absolute workflow/specification/progress paths and the actual slice ID. If this slice is incomplete, the prompt must resume it; if complete, propose authorization for the next slice. Populate subagent task packets and checkpoint fields yourself from evidence.
-```
-
-## Independent verification prompt
-
-Agent-facing template: the main agent fills and sends this; the user does not need to paste it.
-
-Use Luna / low only for a bounded task where delegation has no material effect on the result.
-
-```text
-Independently verify this bounded Android change.
-
-Workspace and immutable snapshot: [path and identity]
-Scope: [module/feature]
-Acceptance criteria: [IDs and expected behavior]
-Exact commands/scenarios: [commands and device steps]
-Environment/variant/device: [details]
-Evidence output location: [path]
-
-Do not modify source, dependencies, configuration, or tests. Build/test artifacts are allowed. Confirm the snapshot, run the assigned checks, and distinguish product, environment, and flaky/unclear failures. Do not infer behavioral correctness from compilation alone or treat skipped tests as success.
-
-Return the snapshot, commands/scenarios executed, pass/fail/blocked per criterion, concise evidence and artifact paths, and unverified items with reasons. If diagnosis requires architectural reasoning, return the evidence and precise question without expanding the task.
-```
-
-## Independent review prompt
-
-Agent-facing template: the main agent fills and sends this; the user does not need to paste it.
-
-Use Terra / medium for an ordinary bounded review; use the main agent or Sol / medium for complex review.
-
-```text
-Review this Android change independently.
-
-Workspace: [path]
-Base and reviewed snapshot: [identities]
-Scope: [files/modules/behavior]
-Acceptance criteria and constraints: [details]
-
-Read the diff and enough surrounding code to trace affected behavior. Do not modify files. Prioritize concrete correctness issues and regressions, including lifecycle restoration, coroutine cancellation, Flow collection, concurrent updates, persistence, retry behavior, navigation, and resource cleanup where relevant.
-
-Report only actionable findings supported by code: severity, file and line, trigger and user-visible consequence, evidence or minimal reproduction, and correction direction. Separate confirmed findings from questions. Avoid style-only comments and speculative redesigns. If none are found, state that and identify review limits. Return the exact snapshot reviewed.
-```
-
-## Incremental checkpoint template
-
-Agent-maintained record in the progress log, not a user prompt or user-filled form.
-
-```text
-EPIC: [name]
-Current slice: [ID]
-Status: not started | in progress | complete | blocked
-Working tree / branch / commit: [identity]
-Changed files: [paths]
-Decisions: [short rationale]
-Acceptance evidence: [criterion ID -> command, test, or scenario]
-Checks: [passed, failed, blocked, not run; exact commands]
-Remaining issues or uncertainty: [details]
-Next concrete action: [action and dependency]
-```
-
-## Conversation guidance
-
-Resume the same conversation when a slice is unfinished, especially after an interruption, because it preserves recent reasoning and failures. Start a new conversation at a clean slice boundary when the next slice is independent or the existing context contains substantial stale or abandoned material. A usage reset alone does not require a new conversation.
-
-Resume prompt:
-
-```text
-Resume the current slice only. Read the latest progress log and inspect the working tree before making changes. Reconcile any interruption, continue from the first unfinished action, and avoid repeating completed checks unless the code or environment changed. Stop at the slice boundary.
-```
-
-Next-slice prompt:
-
-```text
-Execute slice [ID] from [EPIC specification path], using [progress/evidence log path] as the handoff. Read applicable repository instructions and verify the recorded state against the working tree. Follow the one-slice workflow: implement, validate, update the checkpoint, recommend the next conversation choice, and stop for my decision.
-```
-
-## Optional one-time instruction audit
-
-```text
-Audit this repository's AGENTS.md files and relevant development skills for redundant instructions, overly broad skill triggers, unnecessary mandatory reading/testing, and ambiguous approval or stopping rules.
-
-Our intended boundary is:
-- Independently complete implementation, relevant validation, and fixes within one authorized slice.
-- Stop before starting the next slice.
-- Ask about material scope/product decisions or actions outside authority.
-
-Propose a minimal patch. Preserve concrete project constraints and required checks. Make document references conditional on the work being performed. Do not assert that tests or scripts are safe without inspecting them. Identify each removed or revised rule and the behavior it would improve.
-```
-
-This workflow does not change global model configuration, promise automatic continuation, or guarantee that an EPIC slice fits within available credits.
-
-## Sources
-
-- [Rethinking skills and prompts for GPT-6 Astra](https://developers.openai.com/blog/rethinking-skills-and-prompts-for-gpt-6-astra)
-- [Android architecture](https://developer.android.com/topic/architecture)
-- [Android testing strategies](https://developer.android.com/training/testing/fundamentals/strategies?hl=en)
-- [OpenAI subagent guidance](https://learn.chatgpt.com/docs/agent-configuration/subagents)
+The workflow's autonomy within a slice and explicit completion boundary were informed by [Rethinking skills and prompts for GPT-6 Astra](https://developers.openai.com/blog/rethinking-skills-and-prompts-for-gpt-6-astra). Detailed execution instructions live only in the skill so the human guide and agent rules do not become competing prompt sets.
